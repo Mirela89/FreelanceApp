@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: freelance_db
+    environment:
+      POSTGRES_DB: freelancedb
+      POSTGRES_USER: freelance_user
+      POSTGRES_PASSWORD: freelance_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U freelance_user -d freelancedb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
