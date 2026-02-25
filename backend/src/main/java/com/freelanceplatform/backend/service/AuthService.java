@@ -6,6 +6,7 @@ import com.freelanceplatform.backend.dto.response.AuthResponse;
 import com.freelanceplatform.backend.entity.Client;
 import com.freelanceplatform.backend.entity.Freelancer;
 import com.freelanceplatform.backend.entity.User;
+import com.freelanceplatform.backend.mapper.UserMapper;
 import com.freelanceplatform.backend.repository.ClientRepository;
 import com.freelanceplatform.backend.repository.FreelancerRepository;
 import com.freelanceplatform.backend.repository.UserRepository;
@@ -30,6 +31,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserMapper userMapper;
 
     @Transactional
     public User register(RegisterRequest request) {
@@ -39,25 +41,13 @@ public class AuthService {
             throw new RuntimeException("Email already in use");
         }
 
-        // Create user based on role
-        if ("FREELANCER".equals(request.getRole())) {
-            Freelancer freelancer = new Freelancer();
-            freelancer.setName(request.getName());
-            freelancer.setEmail(request.getEmail());
-            freelancer.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-            freelancer.setCreatedDate(LocalDate.now());
-            freelancer.setProfileTitle(request.getProfileTitle());
-            freelancer.setAvailability("AVAILABLE");
-            freelancer.setRating(BigDecimal.ZERO);
-            return freelancerRepository.save(freelancer);
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
 
-        } else { // Default to client if not freelancer
-            Client client = new Client();
-            client.setName(request.getName());
-            client.setEmail(request.getEmail());
-            client.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-            client.setCreatedDate(LocalDate.now());
-            client.setClientType(request.getClientType());
+        if ("FREELANCER".equals(request.getRole())) {
+            Freelancer freelancer = userMapper.toFreelancer(request, encodedPassword);
+            return freelancerRepository.save(freelancer);
+        } else {
+            Client client = userMapper.toClient(request, encodedPassword);
             return clientRepository.save(client);
         }
     }
@@ -74,7 +64,6 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         String token = jwtTokenProvider.generateToken(user.getEmail());
-
         String role = (user instanceof Freelancer) ? "FREELANCER" : "CLIENT";
 
         return new AuthResponse(token, user.getEmail(), role);

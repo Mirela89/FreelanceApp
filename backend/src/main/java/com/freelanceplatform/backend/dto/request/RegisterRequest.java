@@ -28,7 +28,10 @@ public class RegisterRequest {
 
     // for freelancers
     private String profileTitle;
+    private String bio;
 
     // for clients
     private ClientType clientType;
+    private String companyName;
+    private String taxId;
 }
