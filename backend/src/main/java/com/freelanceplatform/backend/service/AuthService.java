@@ -1,14 +1,19 @@
 package com.freelanceplatform.backend.service;
 
+import com.freelanceplatform.backend.dto.request.LoginRequest;
 import com.freelanceplatform.backend.dto.request.RegisterRequest;
+import com.freelanceplatform.backend.dto.response.AuthResponse;
 import com.freelanceplatform.backend.entity.Client;
 import com.freelanceplatform.backend.entity.Freelancer;
 import com.freelanceplatform.backend.entity.User;
 import com.freelanceplatform.backend.repository.ClientRepository;
 import com.freelanceplatform.backend.repository.FreelancerRepository;
 import com.freelanceplatform.backend.repository.UserRepository;
+import com.freelanceplatform.backend.security.JwtTokenProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +28,8 @@ public class AuthService {
     private final ClientRepository clientRepository;
     private final FreelancerRepository freelancerRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
     public User register(RegisterRequest request) {
@@ -53,5 +60,23 @@ public class AuthService {
             client.setClientType(request.getClientType());
             return clientRepository.save(client);
         }
+    }
+
+    public AuthResponse login(LoginRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String token = jwtTokenProvider.generateToken(user.getEmail());
+
+        String role = (user instanceof Freelancer) ? "FREELANCER" : "CLIENT";
+
+        return new AuthResponse(token, user.getEmail(), role);
     }
 }

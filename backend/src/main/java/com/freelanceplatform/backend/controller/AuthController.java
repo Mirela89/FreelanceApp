@@ -1,6 +1,8 @@
 package com.freelanceplatform.backend.controller;
 
+import com.freelanceplatform.backend.dto.request.LoginRequest;
 import com.freelanceplatform.backend.dto.request.RegisterRequest;
+import com.freelanceplatform.backend.dto.response.AuthResponse;
 import com.freelanceplatform.backend.entity.User;
 import com.freelanceplatform.backend.service.AuthService;
 import jakarta.validation.Valid;
@@ -21,5 +23,10 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
         User user = authService.register(request);
         return ResponseEntity.ok("User registered: " + user.getEmail());
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 }
