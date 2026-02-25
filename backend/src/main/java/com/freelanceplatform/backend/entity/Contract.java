@@ -28,7 +28,7 @@ public class Contract {
 
     @OneToOne // One contract is associated with one project
     @JoinColumn(name = "id_project", nullable = false, unique = true)
-    private Project idProject;
+    private Project project;
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;

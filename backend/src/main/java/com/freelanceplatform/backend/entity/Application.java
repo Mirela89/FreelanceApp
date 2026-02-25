@@ -21,11 +21,11 @@ public class Application {
 
     @ManyToOne(fetch = FetchType.LAZY) //Many applications can be made by one freelancer
     @JoinColumn(name = "id_freelancer", nullable = false)
-    private Freelancer idFreelancer;
+    private Freelancer freelancer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_project", nullable = false)
-    private Project idProject;
+    private Project project;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String proposal;
