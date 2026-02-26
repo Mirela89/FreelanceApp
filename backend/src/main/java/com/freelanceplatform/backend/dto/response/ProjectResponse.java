@@ -18,7 +18,7 @@ public class ProjectResponse {
     private BigDecimal budgetMin;
     private BigDecimal budgetMax;
     private PaymentType paymentType;
-    private ProjectStatus projectStatus;
+    private ProjectStatus status;
     private LocalDate postingDate;
     private String clientName;
 }

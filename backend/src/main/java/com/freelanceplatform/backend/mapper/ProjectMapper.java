@@ -9,12 +9,14 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ProjectMapper {
+
     @Mapping(target = "clientName", source = "client.name")
+    @Mapping(target = "status", source = "status")
     ProjectResponse toResponse(Project project);
 
     @Mapping(target = "idProject", ignore = true)
     @Mapping(target = "postingDate", expression = "java(java.time.LocalDate.now())")
-    @Mapping(target = "status", constant = "OPEN")
+    @Mapping(target = "status", expression = "java(com.freelanceplatform.backend.enums.ProjectStatus.OPEN)")
     @Mapping(target = "client", source = "client")
     @Mapping(target = "categories", ignore = true)
     @Mapping(target = "skills", ignore = true)
