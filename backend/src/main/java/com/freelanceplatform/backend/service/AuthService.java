@@ -6,6 +6,8 @@ import com.freelanceplatform.backend.dto.response.AuthResponse;
 import com.freelanceplatform.backend.entity.Client;
 import com.freelanceplatform.backend.entity.Freelancer;
 import com.freelanceplatform.backend.entity.User;
+import com.freelanceplatform.backend.exception.BusinessException;
+import com.freelanceplatform.backend.exception.ResourceNotFoundException;
 import com.freelanceplatform.backend.mapper.UserMapper;
 import com.freelanceplatform.backend.repository.ClientRepository;
 import com.freelanceplatform.backend.repository.FreelancerRepository;
@@ -38,7 +40,7 @@ public class AuthService {
 
         // Check if email is already in use
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already in use");
+            throw new BusinessException("Email already in use");
         }
 
         String encodedPassword = passwordEncoder.encode(request.getPassword());
@@ -61,7 +63,7 @@ public class AuthService {
         );
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String token = jwtTokenProvider.generateToken(user.getEmail());
         String role = (user instanceof Freelancer) ? "FREELANCER" : "CLIENT";

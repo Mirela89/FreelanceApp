@@ -5,6 +5,8 @@ import com.freelanceplatform.backend.dto.response.ProjectResponse;
 import com.freelanceplatform.backend.entity.Client;
 import com.freelanceplatform.backend.entity.Project;
 import com.freelanceplatform.backend.enums.ProjectStatus;
+import com.freelanceplatform.backend.exception.ResourceNotFoundException;
+import com.freelanceplatform.backend.exception.UnauthorizedException;
 import com.freelanceplatform.backend.mapper.ProjectMapper;
 import com.freelanceplatform.backend.repository.ClientRepository;
 import com.freelanceplatform.backend.repository.ProjectRepository;
@@ -28,7 +30,7 @@ public class ProjectService {
     @Transactional
     public ProjectResponse createProject(ProjectRequest request, String email) {
         Client client = clientRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Client not found"));
 
         Project project = projectMapper.toEntity(request, client);
         Project saved = projectRepository.save(project);
@@ -46,14 +48,18 @@ public class ProjectService {
     // Retrieve a project by its ID
     public ProjectResponse getProjectById(Long id) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
         return projectMapper.toResponse(project);
     }
 
     // Retrieve all projects associated with a specific client
     public List<ProjectResponse> getProjectsByClient(String email) {
         Client client = clientRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Client not found"));
+
+        if(!client.getEmail().equals(email)) {
+            throw new UnauthorizedException("Unauthorized to view these projects");
+        }
 
         return projectRepository.findByClientId(client.getIdUser())
                 .stream()
@@ -65,10 +71,10 @@ public class ProjectService {
     @Transactional
     public void deleteProject(Long id, String email) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
         if(!project.getClient().getEmail().equals(email)) {
-            throw new RuntimeException("Unauthorized to delete this project");
+            throw new UnauthorizedException("Unauthorized to delete this project");
         }
 
         projectRepository.delete(project);
