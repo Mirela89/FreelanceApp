@@ -79,22 +79,28 @@ git clone https://github.com/Mirela89/FreelanceApp.git
 cd FreelanceApp
 ```
 
-### 2. Start the database
-```bash
-docker-compose up -d
-```
-
-### 3. Run the backend
-```bash
-cd backend
-./mvnw spring-boot:run
-```
-Backend runs on: `http://localhost:8081`
-
-### 4. Run the frontend
+### 2. Install frontend dependencies
 ```bash
 cd frontend
 npm install
-ng serve
+cd ..
 ```
-Frontend runs on: `http://localhost:4200`
+
+### 3. Start all services
+```bash
+.\start.ps1
+```
+
+This script will:
+- Start the PostgreSQL Docker container
+- Wait for the database to be ready
+- Start the Spring Boot backend
+- Start the Angular frontend
+
+| Service  | URL                   |
+|----------|-----------------------|
+| Frontend | http://localhost:4200 |
+| Backend  | http://localhost:8081 |
+
+### 4. Stop all services
+Press `Ctrl+C` in the terminal where the script is running.
